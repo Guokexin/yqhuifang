@@ -34,6 +34,8 @@ repeat_word = ['说什么','没听清','再说','说啥','信号不好','信号�
 
 certain_word = ['我是','对的','对','是的','是','可以','行','OK','没问题','问吧' ,'有']
 
+no_use_word = ['额','呃','厄','噢','哦','吾']
+
 chat_word = {'吃饭了吗':'还没呢','饿了吗':'不饿'}
 
 #neg_word = ['不是','不对','没有啊','错','没有',"没去过","不在","回老家"]
@@ -72,21 +74,16 @@ no_stati = [ '不满意','不太满意','非常不满意','太差了','差评','
 soso_stati = ['一般','还行','差不多']
 stati = ['满意','非常好','很棒','点赞']
 
-
 remove_word = ['我想','那个','嗯','哈哈','这个','咨询','一下','呃','吧','哎']
-
 
 title = ''
 mydb = db.DBInfo()
 class Request(MyAgi):
 
-
-
     def remove_dirty_word(self, asr_txt):
       for i in remove_word:
         asr_txt = asr_txt.replace(i, '')
       return asr_txt
-
 
     @with_goto
     def call_obs(self):
@@ -99,7 +96,7 @@ class Request(MyAgi):
       #first check id      
       while True:
         user_name = self.getChannelVariables(["name"])[0]
-	phone_no = self.getChannelVariables(['phoneno'])[0]
+        phone_no = self.getChannelVariables(['phoneno'])[0]
         voiceTxt = "您好，这边是深圳电信方案中心工作人员，请问是%s同事吗？您可以回答是或者不是？" % (user_name)
         #self.SynthText(voiceTxt)
         file = ["/usr/local/soundsStatic/yq_welcome"]
@@ -111,31 +108,36 @@ class Request(MyAgi):
         #voiceTxt = "%s同事吗?" % user_name
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
-        asr_txt = remove_dirty_word(asr_txt) 
+        asr_txt = self.remove_dirty_word(asr_txt) 
         self.logInfo("SynthAndRecog recog status is %s " % status)
-        #if (asr_txt.find('不是')>=0):
-        #  self.SynthText("对不起，打扰了。")
-        #  original_words['请问是xxx同事吗？'] = asr_txt;
-        #  answers['请问是xxx同事吗？'] = 'B'
-	  #goto .hangup
+
         if (any(name in asr_txt for name in q0_neg)): 
           self.SynthText("非常抱歉，打扰了")
           original_words['请问是xxx同事吗？您可以回答是或者不是？'] = asr_txt;
           answers['请问是xxx同事吗？您可以回答是或者不是？'] = 'B'
-	  goto .hangup
+          goto .hangup
         elif any(name in asr_txt for name in q0_sure):
           original_words['请问是xxx同事吗？您可以回答是或者不是？'] = asr_txt;
           answers['请问是xxx同事吗？您可以回答是或者不是？'] = 'A'
-	  # check id pass
           break;
         else:
-          voiceTxt = "对不起，请您再说一遍？"
           repeat_num = repeat_num + 1
-          if repeat_num >= 2:
+          if repeat_num == 3:
             original_words['请问是xxx同事吗？您可以回答是或者不是？'] = asr_txt;
-            answers['请问是xxx同事吗？您可以回答是或者不是？'] = 'B'
-	    goto .hangup
+            answers['请问是xxx同事吗？您可以回答是或者不是？'] = 'C'
+            goto .hangup
+            break;
+            
+          file = ["/usr/local/soundsStatic/again"]
+          self.playHints(file) 
+          if repeat_num == 1:
+            self.PlayRecogVoice("/usr/local/soundsStatic/yesno")
+            
+          if repeat_num == 2:
+            self.PlayRecogVoice("/usr/local/soundsStatic/tongshi")
+            self.PlayRecogVoice("/usr/local/soundsStatic/yesno")
           continue
+          
       
       #self.SynthText("本次电信对近期新型肺炎疫情做简要回访")        
           
@@ -147,7 +149,7 @@ class Request(MyAgi):
         self.PlayRecogVoice("/usr/local/soundsStatic/cjsz_q1")
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
-        asr_txt = remove_dirty_word(asr_txt) 
+        asr_txt = self.remove_dirty_word(asr_txt) 
         self.logInfo("SynthAndRecog recog status is %s " % status)
         if any(name in asr_txt for name in q1_neg):
           answers['请问您春节期间是在深圳吗？您可以回答是或者不是？'] = 'B'
@@ -158,13 +160,20 @@ class Request(MyAgi):
           original_words['请问您春节期间是在深圳吗？您可以回答是或者不是？'] = asr_txt;
           break
         else:
-          voiceTxt = "对不起，没有听清您的回答，请您再说一遍？"
           repeat_num = repeat_num + 1
-          if repeat_num >= 2:
+          if repeat_num == 3:
             original_words['请问您春节期间是在深圳吗？您可以回答是或者不是？'] = asr_txt;
             answers['请问您春节期间是在深圳吗？您可以回答是或者不是？'] = 'C'
             break;
-            #goto .hangup
+            
+          file = ["/usr/local/soundsStatic/again"]
+          self.playHints(file) 
+          if repeat_num == 1:
+            self.PlayRecogVoice("/usr/local/soundsStatic/yesno")
+            
+          if repeat_num == 2:
+            self.PlayRecogVoice("/usr/local/soundsStatic/cjsz_q1")
+            self.PlayRecogVoice("/usr/local/soundsStatic/yesno")
           continue
 
       repeat_num = 0 
@@ -175,9 +184,9 @@ class Request(MyAgi):
         #self.SynthAndRecog(voiceTxt);
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
+        asr_txt = self.remove_dirty_word(asr_txt) 
         self.logInfo("SynthAndRecog recog status is %s " % status)
         
-        asr_txt = remove_dirty_word(asr_txt) 
         #否定回答
         if any(name in asr_txt for name in q2_neg):
           answers['请问您近期有去过湖北吗？您可以回答有或者没有？'] = 'B'
@@ -189,13 +198,20 @@ class Request(MyAgi):
           original_words['请问您近期有去过湖北吗？您可以回答有或者没有？'] = asr_txt;
           break
         else:
-          voiceTxt = "对不起，请您再说一遍？"
           repeat_num = repeat_num + 1
-          if repeat_num >= 2:
+          if repeat_num == 3:
             original_words['请问您近期有去过湖北吗？您可以回答有或者没有？'] = asr_txt;
             answers['请问您近期有去过湖北吗？您可以回答有或者没有？'] = 'C'
             break;
-            #goto .hangup
+            
+          file = ["/usr/local/soundsStatic/again"]
+          self.playHints(file)  
+          if repeat_num == 1:
+            self.PlayRecogVoice("/usr/local/soundsStatic/haveno")
+            
+          if repeat_num == 2:
+            self.PlayRecogVoice("/usr/local/soundsStatic/hb_q2")
+            self.PlayRecogVoice("/usr/local/soundsStatic/haveno")
           continue
 
       repeat_num = 0 
@@ -205,9 +221,9 @@ class Request(MyAgi):
         #self.SynthAndRecog(voiceTxt);
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
+        asr_txt = self.remove_dirty_word(asr_txt) 
         self.logInfo("SynthAndRecog recog status is %s " % status)
           
-        asr_txt = remove_dirty_word(asr_txt) 
         #否定回答
         if any(name in asr_txt for name in q3_neg):
           answers['请问您近期有湖北的亲友来访或者接触过湖北过来的人员吗？您可以回答有或者没有？'] = 'B'
@@ -220,13 +236,20 @@ class Request(MyAgi):
           break
           
         else:
-          self.SynthText("对不起，请您再说一遍？")
           repeat_num = repeat_num + 1
-          if repeat_num >= 2:
+          if repeat_num == 3:
             original_words['请问您近期有湖北的亲友来访或者接触过湖北过来的人员吗？您可以回答有或者没有？'] = asr_txt;
             answers['请问您近期有湖北的亲友来访或者接触过湖北过来的人员吗？您可以回答有或者没有？'] = 'C'
             break;
-            #goto .hangup
+            
+          file = ["/usr/local/soundsStatic/again"]
+          self.playHints(file) 
+          if repeat_num == 1:
+            self.PlayRecogVoice("/usr/local/soundsStatic/haveno")
+            
+          if repeat_num == 2:
+            self.PlayRecogVoice("/usr/local/soundsStatic/hb_friend_q3")
+            self.PlayRecogVoice("/usr/local/soundsStatic/haveno")
           continue
          
       repeat_num = 0 
@@ -236,9 +259,9 @@ class Request(MyAgi):
         self.PlayRecogVoice("/usr/local/soundsStatic/health_q4")
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
+        asr_txt = self.remove_dirty_word(asr_txt) 
         self.logInfo("SynthAndRecog recog status is %s " % status)
 
-        asr_txt = remove_dirty_word(asr_txt) 
         #否定回答
         if any(name in asr_txt for name in q4_neg):
           answers['请问您最近是否有出现咳嗽、发烧、流鼻涕、头痛乏力、腹泻等症状呢？请回答有或没有'] = 'B'
@@ -250,14 +273,21 @@ class Request(MyAgi):
           original_words['请问您最近是否有出现咳嗽、发烧、流鼻涕、头痛乏力、腹泻等症状呢？请回答有或没有'] = asr_txt;
           break
         else:
-          self.SynthText("对不起，请您再说一遍？")
           repeat_num = repeat_num + 1
-          if repeat_num >= 2:
+          if repeat_num == 3:
             original_words['请问您最近是否有出现咳嗽、发烧、流鼻涕、头痛乏力、腹泻等症状呢？请回答有或没有'] = asr_txt;
             answers['请问您最近是否有出现咳嗽、发烧、流鼻涕、头痛乏力、腹泻等症状呢？请回答有或没有'] = 'C'
-            break
-            #goto .hangup
-          continue 
+            break;
+            
+          file = ["/usr/local/soundsStatic/again"]
+          self.playHints(file)  
+          if repeat_num == 1:
+            self.PlayRecogVoice("/usr/local/soundsStatic/haveno")
+            
+          if repeat_num == 2:
+            self.PlayRecogVoice("/usr/local/soundsStatic/health_q4")
+            self.PlayRecogVoice("/usr/local/soundsStatic/haveno")
+          continue
             
      
       #delete_sql = "DELETE from t_1_answer where project_id = %d AND phone = '%s'" % (project_id, '13828282828')
@@ -265,6 +295,13 @@ class Request(MyAgi):
       #mydb.writeAnswer(delete_sql)  
       call_time = time.strftime("%Y%m%d%H%M%S", time.localtime())      
       self.logInfo("call_time = %s" % call_time)
+      
+      file = ["/usr/local/soundsStatic/bye"]
+      self.playHints(file)
+      
+      #此处为挂断电话后的点
+      label .hangup  
+      
       for k in answers:
         a = answers[k]
         text = original_words[k]
@@ -289,13 +326,18 @@ class Request(MyAgi):
         sql = "insert into t_1_answer (project_id, customer_name, phone, topic_seq, option_key,ORIGINAL_WORDS,CALL_TIME) values (%d, '%s', '%s', %d, '%s', '%s', %d)" % (project_id, user_name, phone_no, topicSec, a, text , time.time() )
         self.logInfo(sql)
         mydb.writeAnswer(sql) 
+        
+      sql = "UPDATE t_1_customer set status = 'Y' where project_id = %d and phone = %s " % (project_id, phone_no) 
+      self.logInfo(sql)
+      mydb.writeAnswer(sql)  
+    
+      sql = "UPDATE t_1_customer set CALL_TIME = CALL_TIME + 1 where project_id = %d and phone = %s " % (project_id, phone_no) 
+      self.logInfo(sql)
+      mydb.writeAnswer(sql) 
 
-      file = ["/usr/local/soundsStatic/bye"]
-      self.playHints(file)
- 
       #self.SynthText("本次回访结束，提醒您近期尽量不要出门，保持室内通风，出门戴好口罩，勤洗手，勤消毒，做好防护工作，祝您和家人身体健康！生活愉快！再见！")
 
-      label .hangup  
+      
 
 if __name__ == "__main__":
   try:
