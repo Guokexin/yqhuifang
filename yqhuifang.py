@@ -72,9 +72,20 @@ no_stati = [ '不满意','不太满意','非常不满意','太差了','差评','
 soso_stati = ['一般','还行','差不多']
 stati = ['满意','非常好','很棒','点赞']
 
+
+remove_word = ['我想','那个','嗯','哈哈','这个','咨询','一下','呃','吧','哎']
+
+
 title = ''
 mydb = db.DBInfo()
 class Request(MyAgi):
+
+
+
+    def remove_dirty_word(self, asr_txt):
+      for i in remove_word:
+        asr_txt = asr_txt.replace(i, '')
+      return asr_txt
 
 
     @with_goto
@@ -100,7 +111,7 @@ class Request(MyAgi):
         #voiceTxt = "%s同事吗?" % user_name
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
-        
+        asr_txt = remove_dirty_word(asr_txt) 
         self.logInfo("SynthAndRecog recog status is %s " % status)
         #if (asr_txt.find('不是')>=0):
         #  self.SynthText("对不起，打扰了。")
@@ -136,6 +147,7 @@ class Request(MyAgi):
         self.PlayRecogVoice("/usr/local/soundsStatic/cjsz_q1")
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
+        asr_txt = remove_dirty_word(asr_txt) 
         self.logInfo("SynthAndRecog recog status is %s " % status)
         if any(name in asr_txt for name in q1_neg):
           answers['请问您春节期间是在深圳吗？您可以回答是或者不是？'] = 'B'
@@ -165,6 +177,7 @@ class Request(MyAgi):
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
         self.logInfo("SynthAndRecog recog status is %s " % status)
         
+        asr_txt = remove_dirty_word(asr_txt) 
         #否定回答
         if any(name in asr_txt for name in q2_neg):
           answers['请问您近期有去过湖北吗？您可以回答有或者没有？'] = 'B'
@@ -194,6 +207,7 @@ class Request(MyAgi):
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
         self.logInfo("SynthAndRecog recog status is %s " % status)
           
+        asr_txt = remove_dirty_word(asr_txt) 
         #否定回答
         if any(name in asr_txt for name in q3_neg):
           answers['请问您近期有湖北的亲友来访或者接触过湖北过来的人员吗？您可以回答有或者没有？'] = 'B'
@@ -224,6 +238,7 @@ class Request(MyAgi):
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
         self.logInfo("SynthAndRecog recog status is %s " % status)
 
+        asr_txt = remove_dirty_word(asr_txt) 
         #否定回答
         if any(name in asr_txt for name in q4_neg):
           answers['请问您最近是否有出现咳嗽、发烧、流鼻涕、头痛乏力、腹泻等症状呢？请回答有或没有'] = 'B'
