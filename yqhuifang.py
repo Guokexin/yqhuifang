@@ -105,10 +105,10 @@ class Request(MyAgi):
 
         if repeat_num == 0:
           self.SynthAndRecog(voiceTxt);
-        else:
-          file = ["/usr/local/soundsStatic/again"]
-          self.playHints(file) 
-          self.PlayRecogVoice("/usr/local/soundsStatic/yesno")   
+        elif repeat_num == 1:
+          self.PlayRecogVoice("/usr/local/soundsStatic/again")
+        elif repeat_num == 2:
+          self.PlayRecogVoice("/usr/local/soundsStatic/yesno")
 
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
@@ -149,10 +149,10 @@ class Request(MyAgi):
         #self.SynthAndRecog(voiceTxt); #
         if repeat_num == 0:
           self.PlayRecogVoice("/usr/local/soundsStatic/cjsz_q1")
-        else:
-          file = ["/usr/local/soundsStatic/again"]
-          self.playHints(file) 
-          self.PlayRecogVoice("/usr/local/soundsStatic/yesno")   
+        elif repeat_num == 1:
+          self.PlayRecogVoice("/usr/local/soundsStatic/again")
+        elif repeat_num == 2:
+          self.PlayRecogVoice("/usr/local/soundsStatic/yesno")
 
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
@@ -181,11 +181,12 @@ class Request(MyAgi):
 
         if repeat_num == 0:
           self.PlayRecogVoice("/usr/local/soundsStatic/hb_q2")
-        else:
-          file = ["/usr/local/soundsStatic/again"]
-          self.playHints(file) 
-          self.PlayRecogVoice("/usr/local/soundsStatic/yesno")   
-   
+        elif repeat_num == 1:
+          self.PlayRecogVoice("/usr/local/soundsStatic/again")
+        elif repeat_num == 2:
+          self.PlayRecogVoice("/usr/local/soundsStatic/haveno")
+
+  
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
         asr_txt = self.remove_dirty_word(asr_txt) 
@@ -215,11 +216,12 @@ class Request(MyAgi):
         #self.SynthAndRecog(voiceTxt);
         if repeat_num == 0:
           self.PlayRecogVoice("/usr/local/soundsStatic/hb_friend_q3")
-        else:
-          file = ["/usr/local/soundsStatic/again"]
-          self.playHints(file) 
-          self.PlayRecogVoice("/usr/local/soundsStatic/yesno")   
- 
+        elif repeat_num == 1:
+          self.PlayRecogVoice("/usr/local/soundsStatic/again")
+        elif repeat_num == 2:
+          self.PlayRecogVoice("/usr/local/soundsStatic/haveno")
+
+
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
         asr_txt = self.remove_dirty_word(asr_txt) 
@@ -259,11 +261,12 @@ class Request(MyAgi):
         #self.SynthAndRecog(voiceTxt);
         if repeat_num == 0:
           self.PlayRecogVoice("/usr/local/soundsStatic/health_q4")
-        else:
-          file = ["/usr/local/soundsStatic/again"]
-          self.playHints(file) 
-          self.PlayRecogVoice("/usr/local/soundsStatic/yesno")   
- 
+        elif repeat_num == 1:
+          self.PlayRecogVoice("/usr/local/soundsStatic/again")
+        elif repeat_num == 2:
+          self.PlayRecogVoice("/usr/local/soundsStatic/haveno")
+
+
 
         status = self.getChannelVariables(["RECOG_COMPLETION_CAUSE"])[0]
         asr_txt = self.getChannelVariables(["RECOG_RESULT"])[0]
